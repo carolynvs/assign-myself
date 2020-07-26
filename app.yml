@@ -22,8 +22,8 @@ default_events:
 # - deployment_status
 # - fork
 # - gollum
-# - issue_comment
-- issues
+- issue_comment
+# - issues
 # - label
 # - milestone
 # - member
@@ -74,7 +74,7 @@ default_permissions:
 
   # Search repositories, list collaborators, and access repository metadata.
   # https://developer.github.com/v3/apps/permissions/#metadata-permissions
-  metadata: read
+  # metadata: read
 
   # Retrieve Pages statuses, configuration, and builds, as well as create new builds.
   # https://developer.github.com/v3/apps/permissions/#permission-on-pages
@@ -102,7 +102,7 @@ default_permissions:
 
   # Organization members and teams.
   # https://developer.github.com/v3/apps/permissions/#permission-on-members
-  # members: read
+  members: read
 
   # View and manage users blocked by the organization.
   # https://developer.github.com/v3/apps/permissions/#permission-on-organization-user-blocking
@@ -126,14 +126,23 @@ default_permissions:
 
 
 # The name of the GitHub App. Defaults to the name specified in package.json
-# name: My Probot App
+name: Assign Myself
 
 # The homepage of your GitHub App.
 # url: https://example.com/
 
 # A description of the GitHub App.
-# description: A description of my awesome app
+description: >-
+  Let contributors assign themselves to unassigned issues with a comment.
+  
+  You can configure multiple acceptable comments such as:
+  &gt; "I want to work on this"
+  &gt; "/assign"
+
+  You can also limit who can assign issues based on team membership.
+
+  All replies by the bot are customizable so you can set a friendly tone, or
+  give them additional instructions after they assign an issue.
 
 # Set to true when your GitHub App is available to the public or false when it is only accessible to the owner of the app.
-# Default: true
-# public: false
+public: true

@@ -1,19 +1,44 @@
 # assign-myself
 
-> A GitHub App built with [Probot](https://github.com/probot/probot) that Assign yourself to an issue with a comment
+> A GitHub App built with [Probot](https://github.com/probot/probot) that
+> contributors can use to assign themselves to issues with a comment.
 
-## Setup
+1. Have a wonderful issue that someone wants to fix.
+1. They comment on the issue "I want to fix this".
+1. The app assigns the issue* to them and comments that it is assigned to them.
+
+\* The app does not assign issues to contributors if the issue is already assigned.
+
+## Configure 
+
+Save **.github/assign-myself.yml** to your repository and override any setting
+that looks interesting.
+
+```yaml
+# limit who can self-assign to users in the specified team
+team: team-slug 
+
+# Search issue comments for these substrings to determine if
+# the issue should be assigned
+claimMessage:
+  -  'I want to work on this'
+  -  '/assign'
+
+# Comment with this message when the issue is assigned
+assignedMessage: 'Thanks for helping! I have assigned this issue to you. 👍'
+
+# Comment with this message when the issue is already assigned
+noReassignmentMessage: 'Someone is already assigned to this issue'
+
+# Comment with this message when there is an error assigning the issue
+helpMessage: 'Sorry, I could not assign this issue to you. Please contact the maintainers for help.'
+```
+
+## Run locally
 
 ```sh
-# Install dependencies
 npm install
-
-# Run with hot reload
-npm run build:watch
-
-# Compile and run
-npm run build
-npm run start
+npm run dev
 ```
 
 ## Contributing

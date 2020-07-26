@@ -23,7 +23,9 @@
     "test:watch": "jest --watch --notify --notifyMode=change --coverage"
   },
   "dependencies": {
-    "probot": "^9.5.3"
+    "@octokit/rest": "~18.0.3",
+    "probot": "^9.13.0",
+    "probot-serverless-azurefunctions": "0.0.1"
   },
   "devDependencies": {
     "@types/jest": "^25.1.0",

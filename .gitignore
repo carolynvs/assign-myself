@@ -4,4 +4,7 @@ npm-debug.log
 !mock-cert.pem
 .env
 coverage
-lib
+/lib
+/dist
+.vscode
+local.settings.json

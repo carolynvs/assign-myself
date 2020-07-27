@@ -60,22 +60,23 @@ async function postComment(body: string, context: Context<Webhooks.WebhookPayloa
   try {
     await context.github.issues.createComment(reply)
   } catch (error) {
-    app.log(`error leaving comment ${reply.body} on #${context.url}: ${error}`)
+    app.log(`error responding to ${context.payload.comment.url} can't post comment ${reply.body}: ${error}`)
     throw error
   }
 }
 
 async function assignIssue(username: string, context: Context<Webhooks.WebhookPayloadIssueComment>, app: Application) {
   const issue = context.issue()
+
   try {
     await context.github.issues.addAssignees({
       owner: issue.owner,
       repo: issue.repo,
-      'issue_number': issue.number,
+      number: issue.number,
       assignees: [username],
     });
   } catch (error) {
-    app.log(`error assigning #${context.url} to ${username}: ${error}`)
+    app.log(`error responding to ${context.payload.comment.url} can't assign ${issue.owner}/${issue.repo}/#${issue.number} to ${username}: ${error}`)
     throw error
   }
 }
@@ -89,7 +90,7 @@ async function onTeam (username: string, team: string, org: string, context: Con
     })
     return onTeam.status != 404
   } catch (error) {
-    app.log(`error checking team membership of ${username} in ${org}/${team}: ${error}`)
+    app.log(`error responding to ${context.payload.comment.url} can't check team membership of ${username} in ${org}/${team}: ${error}`)
     throw error
   }
 }

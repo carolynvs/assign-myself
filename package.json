@@ -15,8 +15,10 @@
   ],
   "scripts": {
     "build": "tsc",
+    "build:production": "npm run prestart && npm prune --production",
     "build:watch": "tsc && (tsc -w --preserveWatchOutput & nodemon)",
     "dev": "npm run build:watch",
+    "prestart": "npm run build && func extensions install",
     "start": "func start",
     "lint": "standard **/*.ts --fix",
     "test": "jest && standard **/*.ts",

@@ -1,0 +1,24 @@
+FROM debian:stretch-slim
+
+ARG BUNDLE_DIR
+
+# Install azure functions cli (func)
+RUN apt-get update && apt-get install -y apt-transport-https curl gpg ca-certificates && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg && \
+    mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg && \
+    echo "deb [arch=amd64] https://packages.microsoft.com/debian/9/prod stretch main" > /etc/apt/sources.list.d/dotnetdev.list && \
+    apt-get update && apt-get install -y azure-functions-core-tools-3
+
+# Install node and npm
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash && \
+    apt-get install -y nodejs
+
+# PORTER_MIXINS
+
+# Use the BUNDLE_DIR build argument to copy files into the bundle
+COPY . $BUNDLE_DIR
+
+# Build the functions app in the bundle
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+WORKDIR ${BUNDLE_DIR}
+RUN ./helpers.sh build

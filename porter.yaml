@@ -1,0 +1,161 @@
+name: assign-myself
+version: 0.1.0
+description: Manage the assign-myself GitHub action.
+tag: carolynvs/assign-myself:v0.1.0
+dockerfile: Dockerfile.tmpl
+
+parameters:
+  - name: resource-group
+    type: string
+    default: assign-myself
+  - name: location
+    type: string
+    default: centralus
+  - name: app-name
+    type: string
+    env: APP_NAME
+    default: assign-myself
+  - name: storage-name
+    type: string
+    default: assignmyself
+  - name: keyvault-name
+    type: string
+    default: carolynvs
+    
+credentials:
+  - name: client-id
+    env: AZURE_CLIENT_ID
+  - name: client-secret
+    env: AZURE_CLIENT_SECRET
+  - name: tenant
+    env: AZURE_TENANT_ID
+
+outputs:
+  - name: endpoint
+    type: string
+    applyTo:
+      - install
+      - upgrade
+
+mixins:
+  - az
+  - exec
+
+install:
+  - az:
+      description: "Login"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.client-id }}"
+        password: "{{ bundle.credentials.client-secret }}"
+        tenant: "{{ bundle.credentials.tenant }}"
+  - az:
+      description: "Create resource group"
+      arguments:
+        - group 
+        - create 
+      flags:
+        name: "{{ bundle.parameters.resource-group }}"
+        location: "{{ bundle.parameters.location }}"
+  - az:
+      description: "Create storage account"
+      arguments:
+        - storage
+        - account
+        - create
+      flags:
+        name: " {{ bundle.parameters.storage-name }}"
+        resource-group: "{{ bundle.parameters.resource-group }}"
+        location: "{{ bundle.parameters.location }}"
+        sku: Standard_LRS
+  - az:
+      description: "Create function app"
+      arguments:
+        - functionapp
+        - create
+      flags:
+        resource-group: "{{ bundle.parameters.resource-group }}"
+        consumption-plan-location: "{{ bundle.parameters.location }}"
+        runtime: node
+        runtime-version: 12 
+        functions-version: 3
+        name: "{{ bundle.parameters.app-name }}"
+        storage-account: "{{ bundle.parameters.storage-name }}"
+  - az:
+      description: "Create an identity for the function app"
+      arguments:
+        - functionapp
+        - identity 
+        - assign
+      flags:
+        name: "{{ bundle.parameters.app-name }}"
+        resource-group: "{{ bundle.parameters.resource-group }}"
+      outputs:
+        - name: app-principal-id
+          jsonPath: "$.principalId"
+  - exec:
+      description: "Retrieve function app service principal name"
+      command: ./helpers.sh
+      arguments:
+        - get-appid
+        - "{{ bundle.outputs.app-principal-id }}" 
+      outputs:
+        - name: app-id
+          jsonPath: "$[0].appId"
+  - az:
+      description: "Give function app access to keyvault"
+      arguments:
+        - keyvault
+        - set-policy
+      flags:
+        name: "{{ bundle.parameters.keyvault-name }}"
+        spn: "{{ bundle.outputs.app-id }}"
+        secret-permissions: get
+  - exec:
+      description: "Deploy function"
+      command: ./helpers.sh
+      arguments:
+        - deploy
+      outputs:
+        - name: endpoint
+          regex: "Invoke url: (.*)"
+
+upgrade:
+  - az:
+      description: "Login"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.client-id }}"
+        password: "{{ bundle.credentials.client-secret }}"
+        tenant: "{{ bundle.credentials.tenant }}"
+  - exec:
+      description: "Deploy function"
+      command: ./helpers.sh
+      arguments:
+        - deploy
+      outputs:
+        - name: endpoint
+          regex: "Invoke url: (.*)"
+
+uninstall:
+  - az:
+      description: "Login"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.client-id }}"
+        password: "{{ bundle.credentials.client-secret }}"
+        tenant: "{{ bundle.credentials.tenant }}"
+  - az:
+      description: "Remove application's resource group"
+      arguments:
+        - group
+        - delete
+      flags:
+        name: "{{ bundle.parameters.resource-group }}"
+        "yes":

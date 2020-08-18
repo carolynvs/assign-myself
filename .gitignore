@@ -1,3 +1,8 @@
+# Porter stuff
+Dockerfile
+.cnab/
+
+# node.js stuff
 node_modules
 npm-debug.log
 *.pem
